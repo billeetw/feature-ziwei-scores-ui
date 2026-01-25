@@ -1239,6 +1239,9 @@ if (summaryRedMonthsEl) {
         renderZiwei(ziwei);
         document.getElementById("ziweiMeta").textContent =
           ziwei ? `命宮：${ziwei.core?.minggong || "—"}｜五行局：${ziwei.core?.wuxingju || "—"}` : "—";
+const scoreResp = await fetch(`${API_BASE}/charts/${payload.chartId}/scores`);
+const ziweiScores = await scoreResp.json();
+
 
 // ✅ 新增：如果 scores 有算出來，就畫出來
 if (ziweiScores && ziweiScores.palaceScores) {
