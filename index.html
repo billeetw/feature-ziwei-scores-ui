@@ -1144,46 +1144,48 @@ async function calculate(){
     const chartId = payload.chartId || contract.chartId || null;
     const bazi = contract.bazi;
     const ziwei = contract.ziwei;
+// ✅ 先宣告一個變數給 scores 用
+let ziweiScores = null;
 
-    if (!bazi) throw new Error("後端未回傳 bazi");
+// ✅ 有 chartId 才打 scores API
+if (chartId) {
+  try {
+    const scoreResp = await fetch(
+      `${API_BASE}/charts/${encodeURIComponent(chartId)}/scores`,
+      { method: "GET" }
+    );
 
-    // ✅ 先預設 ziweiScores = null
-    let ziweiScores = null;
-
-    // ✅ 有 chartId 才打 scores API
-    if (chartId) {
-      try {
-        const scoreResp = await fetch(
-          `${API_BASE}/charts/${encodeURIComponent(chartId)}/scores`,
-          { method: "GET" }
-        );
-        if (scoreResp.ok) {
-          ziweiScores = await scoreResp.json();
-          window.ziweiScores = ziweiScores; // 給你 debug 用
-          console.log("ziweiScores from API:", ziweiScores);
-          console.log("payload:", payload);
-          console.log("chartId:", chartId);
- } else {
-          console.warn("scores API HTTP", scoreResp.status, await scoreResp.text().catch(()=> ""));
-        }
-      } catch (err) {
-        console.warn("scores API error:", err);
-      }
+    if (scoreResp.ok) {
+      ziweiScores = await scoreResp.json();
+      window.ziweiScores = ziweiScores; // 給你 debug 用
+      console.log("ziweiScores from API:", ziweiScores);
+      console.log("payload:", payload);
+      console.log("chartId:", chartId);
     } else {
-      console.warn("No chartId in payload, scores API 無法呼叫");
+      console.warn(
+        "scores API HTTP",
+        scoreResp.status,
+        await scoreResp.text().catch(() => "")
+      );
     }
+  } catch (err) {
+    console.warn("scores API error:", err);
+  }
+} else {
+  console.warn("No chartId in payload, scores API 無法呼叫");
+}
 
-    // 動態宮位環：從後端拿 iztro 的 palaces 排序
-    if (ziwei && Array.isArray(ziwei.palaceRing)) {
-      PALACE_RING = ziwei.palaceRing.map((name) => {
-        if (name === "命宫") return "命宮";
-        if (name === "财帛") return "財帛";
-        if (name === "官禄") return "官祿";
-        return name;
-      });
-    } else {
-      PALACE_RING = PALACE_DEFAULT.slice();
-    }
+// 🔁 動態宮位環：從後端拿 iztro 的 palaces 排序
+if (ziwei && Array.isArray(ziwei.palaceRing)) {
+  PALACE_RING = ziwei.palaceRing.map((name) => {
+    if (name === "命宫") return "命宮";
+    if (name === "财帛") return "財帛";
+    if (name === "官禄") return "官祿";
+    return name;
+  });
+} else {
+  PALACE_RING = PALACE_DEFAULT.slice();
+}
 
     // ===== 進入系統 UI =====
     const sysEl   = document.getElementById("system");
@@ -1241,18 +1243,18 @@ async function calculate(){
         ziwei ? `命宮：${ziwei.core?.minggong || "—"}｜五行局：${ziwei.core?.wuxingju || "—"}` : "—";
     }
 
-    // ✅ 這裡只用「上面那次 scores API 的結果」
-    if (ziweiScores && ziweiScores.palaceScores) {
-      renderZiweiScores(ziweiScores);
-    } else {
-      const palaceBox = document.getElementById("ziweiPalaceScores");
-      if (palaceBox) {
-        palaceBox.innerHTML =
-          `<div class="text-xs text-slate-400">（暫無分數資料）</div>`;
-      }
-      // 五行比例沒有資料時，就畫一個空的
-      renderBar("ziweiWx", { 木:0, 火:0, 土:0, 金:0, 水:0 }, 1);
-    }
+// ✅ 用上面已經取得的 ziweiScores 來畫「宮位強度」與「紫微五行比例」
+if (ziweiScores && ziweiScores.palaceScores) {
+  renderZiweiScores(ziweiScores);
+} else {
+  const palaceBox = document.getElementById("ziweiPalaceScores");
+  if (palaceBox) {
+    palaceBox.innerHTML = `<div class="text-xs text-slate-400">（暫無分數資料）</div>`;
+  }
+  // 也順便畫一個空的五行 bar，避免這塊完全空白
+  renderBar("ziweiWx", { 木:0, 火:0, 土:0, 金:0, 水:0 }, 1);
+}
+
 
     // tactical panel
     const tactics = computeDynamicTactics(bazi);
