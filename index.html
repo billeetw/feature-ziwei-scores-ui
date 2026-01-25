@@ -1144,7 +1144,8 @@ if (chartId) {
     if (scoreResp.ok) {
       ziweiScores = await scoreResp.json();
       // 可以暫存起來給其他 panel 用
-      (window as any).ziweiScores = ziweiScores;
+    window.ziweiScores = ziweiScores;
+
     } else {
       console.warn("scores API HTTP", scoreResp.status, await scoreResp.text().catch(() => ""));
     }
