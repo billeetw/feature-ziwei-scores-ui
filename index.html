@@ -1198,19 +1198,38 @@ if (ziwei && Array.isArray(ziwei.palaceRing)) {
 
         if (!bazi) throw new Error("後端未回傳 bazi");
 
-        // 進入系統：顯示 workspace nav + CTA，並收起輸入卡
-        document.getElementById("system").classList.remove("hidden");
-        document.getElementById("workspaceNav").classList.remove("hidden");
-        document.getElementById("navCta").classList.remove("hidden");
-        document.getElementById("inputCard").classList.add("hidden");
+     // 進入系統：顯示 workspace nav + CTA，並收起輸入卡
+const sysEl   = document.getElementById("system");
+const navEl   = document.getElementById("workspaceNav");
+const navCta  = document.getElementById("navCta");
+const inputEl = document.getElementById("inputCard");
 
-        // summary
-        document.getElementById("summaryBirth").textContent =
-          `${vy}/${pad2(vm)}/${pad2(vd)} · ${pad2(vh)}:${pad2(vmin)}（公曆）`;
-        document.getElementById("summaryDM").textContent = bazi.dmElement || "—";
-        document.getElementById("summaryDominant").textContent = (bazi.tenGod?.dominant || "—").trim() || "—";
-        const reds = bazi.liuyue2026?.redMonths || [];
-        document.getElementById("summaryRedMonths").textContent = reds.length ? reds.join("、") : "偏少（可穩推）";
+if (sysEl)   sysEl.classList.remove("hidden");
+if (navEl)   navEl.classList.remove("hidden");
+if (navCta)  navCta.classList.remove("hidden");
+if (inputEl) inputEl.classList.add("hidden");
+
+// summary（都先抓 element 再寫，避免 null.textContent）
+const elBirth     = document.getElementById("summaryBirth");
+const elDM        = document.getElementById("summaryDM");
+const elDominant  = document.getElementById("summaryDominant");
+const elRedMonths = document.getElementById("summaryRedMonths");
+
+if (elBirth) {
+  elBirth.textContent =
+    `${vy}/${pad2(vm)}/${pad2(vd)} · ${pad2(vh)}:${pad2(vmin)}（公曆）`;
+}
+if (elDM) {
+  elDM.textContent = bazi.dmElement || "—";
+}
+if (elDominant) {
+  elDominant.textContent = (bazi.tenGod?.dominant || "—").trim() || "—";
+}
+if (elRedMonths) {
+  const reds = bazi.liuyue2026?.redMonths || [];
+  elRedMonths.textContent = reds.length ? reds.join("、") : "偏少（可穩推）";
+}
+
 
         // bazi + canggan + bars
         renderPillars(bazi);
