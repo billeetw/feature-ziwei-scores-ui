@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
@@ -218,6 +218,7 @@
 </head>
 
 <body class="pb-20">
+
   <!-- TOP NAV -->
   <div class="nav-bar flex items-center justify-between gap-3">
     <div class="flex items-center gap-2">
@@ -241,6 +242,7 @@
   </div>
 
   <main class="max-w-7xl mx-auto px-4 pt-6 space-y-8">
+
     <!-- LANDING -->
     <header id="landing" class="text-center space-y-3">
       <p class="section-subtitle">2026 Strategic Command Hub</p>
@@ -253,7 +255,7 @@
       </p>
     </header>
 
-    <!-- INPUT -->
+    <!-- INPUT (will be removed after entering system) -->
     <section id="inputCard" class="glass p-6 md:p-7 max-w-2xl mx-auto space-y-5">
       <div class="flex items-start justify-between gap-4">
         <div>
@@ -284,7 +286,8 @@
 
     <!-- SYSTEM WORKSPACES -->
     <section id="system" class="hidden space-y-8">
-      <!-- TOP SUMMARY BAR -->
+
+      <!-- TOP SUMMARY BAR (after computed) -->
       <section id="ws-summary" class="glass p-6 md:p-7">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -309,40 +312,24 @@
       </section>
 
       <div class="grid xl:grid-cols-[1fr,440px] gap-8">
+
         <!-- LEFT WORKSPACES -->
         <div class="space-y-8">
+
           <!-- 紫微 -->
           <section id="ws-ziwei" class="glass p-6 md:p-7 space-y-4">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <div class="section-subtitle mb-1">ZiWei Chart</div>
-                <h2 class="text-xl font-black tracking-tight">紫微 · 12 宮作戰盤</h2>
-                <p class="text-xs text-slate-400 mt-1">
-                  點任何一宮，三方四正會自動高亮，右側顯示該宮位與星曜的資料庫解釋。
-                </p>
+                <div class="section-subtitle mb-1">Zi Wei Dou Shu</div>
+                <h2 class="text-xl font-black tracking-tight">紫微命盤 · 12 宮總覽</h2>
+                <p class="text-xs text-slate-400 mt-1">點任一宮位：右側會出現宮位資料庫解釋＋星曜解釋，並自動標示三方四正。</p>
               </div>
-              <div class="text-right text-[11px] text-slate-400">
-                <div id="ziweiMeta" class="mb-1"></div>
-                <div>（本盤採後端 iztro 計算）</div>
-              </div>
+              <div class="text-[11px] text-slate-400 text-right" id="ziweiMeta">—</div>
             </div>
 
             <div id="ziweiGrid" class="zw-grid-container"></div>
-            <div class="text-xs text-slate-400" id="ziweiHint"></div>
 
-            <!-- 紫微分數區塊 -->
-            <section id="ws-ziwei-scores" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="rounded-xl border border-white/10 p-4">
-                <div class="text-xs font-semibold text-slate-200 mb-2">宮位強度</div>
-                <div id="ziweiPalaceScores"></div>
-              </div>
-              <div class="rounded-xl border border-white/10 p-4">
-                <div class="text-xs font-semibold text-slate-200 mb-2">紫微五行比例</div>
-                <div id="ziweiWuxingScores">
-                  <div id="ziweiWx"></div>
-                </div>
-              </div>
-            </section>
+            <div class="text-xs text-slate-400" id="ziweiHint"></div>
           </section>
 
           <!-- 八字五行 -->
@@ -395,8 +382,8 @@
               <h2 class="text-xl font-black tracking-tight">2026 流月紅綠燈（12）</h2>
               <p class="text-xs text-slate-400 mt-1">🔴 壓力月：先守規則／🟢 穩進月：適合推進專案</p>
             </div>
-            <div id="monthGrid" class="space-y-2"></div>
-            <div id="monthDetailBox" class="mt-4 space-y-2 text-xs"></div>
+             <div id="monthGrid" class="space-y-2"></div>
+             <div id="monthDetailBox" class="mt-4 space-y-2 text-xs"></div>
           </section>
 
           <!-- 戰略面板 -->
@@ -431,9 +418,10 @@
               前往預約線上諮詢
             </a>
           </section>
+
         </div>
 
-        <!-- RIGHT DETAIL PANEL -->
+        <!-- RIGHT DETAIL PANEL（桌機用） -->
         <aside class="space-y-6" id="detailPanel">
           <div class="glass p-6 md:p-7 sticky top-24 border border-amber-500/30 overflow-y-auto max-h-[85vh]">
             <div class="section-subtitle mb-2">Palace Detail</div>
@@ -456,6 +444,7 @@
             <div class="text-xs text-slate-400 mt-1">（內容優先來自資料庫：wuxing_meanings；若無則顯示預設）</div>
             <div id="wuxingMeaningBox" class="mt-4 space-y-3"></div>
           </div>
+
         </aside>
       </div>
     </section>
@@ -465,9 +454,14 @@
     // ====== CONFIG ======
     const API_BASE = "https://17gonplay-api.billeetw.workers.dev";
 
-    // 預設順序（fallback 用）
-    const PALACE_DEFAULT = ["命宮","兄弟","夫妻","子女","財帛","疾厄","遷移","僕役","官祿","田宅","福德","父母"];
-    let PALACE_RING = PALACE_DEFAULT.slice();
+    // ====== CONSTANTS ======
+// 預設順序（fallback 用），真的用的會是 RUNTIME_PALACE_RING
+const PALACE_DEFAULT = ["命宮","兄弟","夫妻","子女","財帛","疾厄","遷移","僕役","官祿","田宅","福德","父母"];
+
+// 這個才是實際運行時用的「宮位環」，先用預設，等 API 回來再覆蓋
+let PALACE_RING = PALACE_DEFAULT.slice();
+
+
 
     // 宮位簡繁對照
     const PALACE_KEY_MAP = {
@@ -485,111 +479,126 @@
       "父母": ["父母"],
     };
 
-    // 12 宮盤面位置（4x4 外圈）
-    const gridAreas = [
-      "4/1/5/2", // 寅
-      "3/1/4/2", // 卯
-      "2/1/3/2", // 辰
-      "1/1/2/2", // 巳
-      "1/2/2/3", // 午
-      "1/3/2/4", // 未
-      "1/4/2/5", // 申
-      "2/4/3/5", // 酉
-      "3/4/4/5", // 戌
-      "4/4/5/5", // 亥
-      "4/3/5/4", // 子
-      "4/2/5/3"  // 丑
-    ];
+   // 12 宮盤面位置（4x4 外圈）
+// 索引：0:寅(左下), 1:卯, 2:辰, 3:巳(左上), 4:午, 5:未, 6:申(右上), 7:酉, 8:戌, 9:亥(右下), 10:子, 11:丑
+const gridAreas = [
+  "4/1/5/2", // 0: 寅 (左下)
+  "3/1/4/2", // 1: 卯
+  "2/1/3/2", // 2: 辰
+  "1/1/2/2", // 3: 巳 (左上)
+  "1/2/2/3", // 4: 午
+  "1/3/2/4", // 5: 未
+  "1/4/2/5", // 6: 申 (右上)
+  "2/4/3/5", // 7: 酉
+  "3/4/4/5", // 8: 戌
+  "4/4/5/5", // 9: 亥 (右下)
+  "4/3/5/4", // 10: 子
+  "4/2/5/3"  // 11: 丑
+];
 
-    const STAR_NAME_TRAD_MAP = {
-      // 14 主星
-      "紫微": "紫微", "紫薇": "紫微",
-      "天机": "天機", "天機": "天機",
-      "太阳": "太陽", "太陽": "太陽",
-      "太阴": "太陰", "太陰": "太陰",
-      "武曲": "武曲",
-      "天同": "天同",
-      "廉贞": "廉貞", "廉貞": "廉貞",
-      "天府": "天府",
-      "贪狼": "貪狼", "貪狼": "貪狼",
-      "巨门": "巨門", "巨門": "巨門",
-      "天相": "天相",
-      "天梁": "天梁",
-      "七杀": "七殺", "七殺": "七殺",
-      "破军": "破軍", "破軍": "破軍",
+ const STAR_NAME_TRAD_MAP = {
+  // 14 主星
+  "紫微": "紫微", "紫薇": "紫微",
+  "天机": "天機", "天機": "天機",
+  "太阳": "太陽", "太陽": "太陽",
+  "太阴": "太陰", "太陰": "太陰",
+  "武曲": "武曲",
+  "天同": "天同",
+  "廉贞": "廉貞", "廉貞": "廉貞",
+  "天府": "天府",
+  "贪狼": "貪狼", "貪狼": "貪狼",
+  "巨门": "巨門", "巨門": "巨門",
+  "天相": "天相",
+  "天梁": "天梁",
+  "七杀": "七殺", "七殺": "七殺",
+  "破军": "破軍", "破軍": "破軍",
 
-      // 六吉星
-      "左辅": "左輔", "左輔": "左輔",
-      "右弼": "右弼",
-      "文昌": "文昌",
-      "文曲": "文曲",
-      "天魁": "天魁",
-      "天钺": "天鉞", "天鉞": "天鉞",
+  // 六吉星
+  "左辅": "左輔", "左輔": "左輔",
+  "右弼": "右弼",
+  "文昌": "文昌",
+  "文曲": "文曲",
+  "天魁": "天魁",
+  "天钺": "天鉞", "天鉞": "天鉞",
 
-      // 六煞星
-      "擎羊": "擎羊",
-      "陀罗": "陀羅", "陀羅": "陀羅",
-      "火星": "火星",
-      "铃星": "鈴星", "鈴星": "鈴星",
-      "地劫": "地劫",
-      "地空": "地空",
+  // 六煞星
+  "擎羊": "擎羊",
+  "陀罗": "陀羅", "陀羅": "陀羅",
+  "火星": "火星",
+  "铃星": "鈴星", "鈴星": "鈴星",
+  "地劫": "地劫",
+  "地空": "地空",
 
-      // 重要輔星
-      "禄存": "祿存", "祿存": "祿存",
-      "天马": "天馬", "天馬": "天馬",
-      "天伤": "天傷", "天傷": "天傷",
-      "天使": "天使",
-      "天才": "天才",
-      "天寿": "天壽", "天壽": "天壽",
-      "天官": "天官",
-      "天福": "天福",
-      "天巫": "天巫",
-      "天喜": "天喜",
-      "天姚": "天姚",
-      "紅鸞": "紅鸞", "红鸾": "紅鸞",
-      "天刑": "天刑",
-      "解神": "解神",
+  // 重要輔星
+  "禄存": "祿存", "祿存": "祿存",
+  "天马": "天馬", "天馬": "天馬",
+  "天伤": "天傷", "天傷": "天傷",
+  "天使": "天使",
+  "天才": "天才",
+  "天寿": "天壽", "天壽": "天壽",
+  "天官": "天官",
+  "天福": "天福",
+  "天巫": "天巫",
+  "天喜": "天喜",
+  "天姚": "天姚",
+  "紅鸞": "紅鸞", "红鸾": "紅鸞",
+  "天刑": "天刑",
+  "解神": "解神",
 
-      // 補足雜曜與神煞
-      "天厨": "天廚", "天廚": "天廚",
-      "截路": "截路",
-      "孤辰": "孤辰",
-      "寡宿": "寡宿",
-      "空亡": "空亡",
-      "破碎": "破碎",
-      "天贵": "天貴", "天貴": "天貴",
-      "华盖": "華蓋", "華蓋": "華蓋",
-      "天哭": "天哭",
-      "天虚": "天虛", "天虛": "天虛",
-      "天德": "天德",
-      "月德": "月德",
-      "旬空": "旬空",
-      "台辅": "台輔", "台輔": "台輔",
-      "封诰": "封誥", "封誥": "封誥",
-      "龙池": "龍池", "龍池": "龍池",
-      "凤阁": "鳳閣", "鳳閣": "鳳閣",
-      "年解": "年解",
-      "咸池": "咸池",
-      "三台": "三台",
-      "八座": "八座",
-      "恩光": "恩光",
-      "蜚廉": "蜚廉",
-      "阴煞": "陰煞", "陰煞": "陰煞",
-      "天月": "天月",
+  // --- 補足雜曜與神煞 ---
+  "天厨": "天廚", "天廚": "天廚",
+  "截路": "截路",
+  "孤辰": "孤辰",
+  "寡宿": "寡宿",
+  "空亡": "空亡",
+  "破碎": "破碎",
+  "天贵": "天貴", "天貴": "天貴",
+  "华盖": "華蓋", "華蓋": "華蓋",
+  "天哭": "天哭",
+  "天虚": "天虛", "天虛": "天虛",
+  "天德": "天德",
+  "月德": "月德",
+  "旬空": "旬空",
+  "台辅": "台輔", "台輔": "台輔",
+  "封诰": "封誥", "封誥": "封誥",
+  "龙池": "龍池", "龍池": "龍池",
+  "凤阁": "鳳閣", "鳳閣": "鳳閣",
+  "年解": "年解",
+  "咸池": "咸池",
+  "三台": "三台",
+  "八座": "八座",
+  "恩光": "恩光",
+  "蜚廉": "蜚廉",
+  "阴煞": "陰煞", "陰煞": "陰煞",
+  "天月": "天月",
 
-      // 類別型星曜
-      "甲級主星": "甲級主星",
-      "六吉星": "六吉星",
-      "六煞星": "六煞星",
-      "南斗、北斗星": "南斗、北斗星",
-      "中天星": "中天星",
-      "輔助星": "輔助星",
-      "祿存與天馬": "祿存與天馬"
-    };
+  // 博士十二神
+  "博士": "博士",
+  "力士": "力士",
+  "青龍": "青龍", "青龙": "青龍",
+  "小耗": "小耗",
+  "將軍": "將軍", "将军": "將軍",
+  "奏書": "奏書", "奏书": "奏書",
+  "喜神": "喜神",
+  "病符": "病符",
+  "大耗": "大耗",
+  "伏兵": "伏兵",
+  "官府": "官府",
+
+  // 類別型星曜
+  "甲級主星": "甲級主星",
+  "六吉星": "六吉星",
+  "六煞星": "六煞星",
+  "南斗、北斗星": "南斗、北斗星",
+  "中天星": "中天星",
+  "輔助星": "輔助星",
+  "祿存與天馬": "祿存與天馬"
+};
 
     function toTraditionalStarName(name){
       return STAR_NAME_TRAD_MAP[name] || name;
     }
+
 
     // 五行 map 用「繁體星名」
     const STAR_WUXING_MAP = {
@@ -641,44 +650,21 @@
       return all;
     }
 
-    // 安全版 renderBar
-    function renderBar(targetId, data, maxValue){
+    function renderBar(targetId, data, max){
       const box = document.getElementById(targetId);
-      if (!box) {
-        console.warn("renderBar: container not found:", targetId);
-        return;
-      }
+      if (!box) return;
       box.innerHTML = "";
-
-      if (!data || typeof data !== "object") {
-        console.warn("renderBar: invalid data, fallback to zeros:", data);
-        data = { 木:0, 火:0, 土:0, 金:0, 水:0 };
-      }
-
-      const keys = ["木","火","土","金","水"];
-      const values = keys.map(k => {
-        const v = Number(data[k] ?? 0);
-        return Number.isFinite(v) ? v : 0;
-      });
-
-      let max = Number(maxValue);
-      if (!Number.isFinite(max) || max <= 0) {
-        max = Math.max(...values);
-        if (!Number.isFinite(max) || max <= 0) max = 1;
-      }
-
-      keys.forEach((e, idx)=>{
-        const v = values[idx];
-        const w = Math.max(3, (v / max) * 100);
-
+      ["木","火","土","金","水"].forEach(e=>{
+        const v = Number(data?.[e] || 0);
+        const w = max ? Math.max(3, (v / max) * 100) : 0;
         box.innerHTML += `
           <div class="mb-1">
             <div class="flex justify-between text-xs text-slate-300">
               <span class="font-bold">${e}</span>
-              <span class="font-mono">${v.toFixed(2)}</span>
+              <span class="font-mono">${v.toFixed(1)}</span>
             </div>
             <div class="h-2 bg-white/10 rounded overflow-hidden">
-              <div class="h-full wuxing-${e}" style="width:${w}%;"></div>
+              <div class="h-full wuxing-${e}" style="width:${w}%"></div>
             </div>
           </div>
         `;
@@ -800,121 +786,125 @@
     }
 
     // ====== RENDER: LIUYUE ======
-    function renderLiuyue(bazi){
-      const mGrid   = document.getElementById("monthGrid");
-      const detail  = document.getElementById("monthDetailBox");
-      const rhythm  = document.getElementById("monthlyRhythmBox");
-      if (!mGrid || !rhythm) return;
+function renderLiuyue(bazi){
+  const mGrid   = document.getElementById("monthGrid");
+  const detail  = document.getElementById("monthDetailBox");
+  const rhythm  = document.getElementById("monthlyRhythmBox");
+  if (!mGrid || !rhythm) return;
 
-      const bounds = bazi?.liuyue2026?.bounds || [];
-      mGrid.innerHTML = "";
-      rhythm.innerHTML = "";
-      if (detail) detail.innerHTML = `
-        <div class="text-slate-400/80">
-          點任一個月份，這裡會顯示：對你個人而言的
-          <span class="text-amber-300 font-bold">危險指數＋觸發原因＋戰術指令</span>。
+  const bounds = bazi?.liuyue2026?.bounds || [];
+  mGrid.innerHTML = "";
+  rhythm.innerHTML = "";
+  if (detail) detail.innerHTML = `
+    <div class="text-slate-400/80">
+      點任一個月份，這裡會顯示：對你個人而言的
+      <span class="text-amber-300 font-bold">危險指數＋觸發原因＋戰術指令</span>。
+    </div>
+  `;
+
+  if (!bounds.length){
+    mGrid.innerHTML = `<div class="text-xs text-slate-400 italic">（暫無流月資料）</div>`;
+    if (detail){
+      detail.innerHTML = `<div class="text-xs text-slate-400 italic">（暫無流月資料）</div>`;
+    }
+    return;
+  }
+
+  bounds.forEach((b)=>{
+    const isRed = b.light === "RED";
+    const tag   = isRed ? "🔴 壓力" : "🟢 穩進";
+
+    // 主列表卡片
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className =
+      "w-full text-left flex flex-col gap-1 p-3 rounded-xl border-l-4 transition " +
+      (isRed ? "border-red-500 bg-red-500/10 hover:bg-red-500/20"
+             : "border-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20");
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="font-black text-sm text-slate-50">
+            ${b.gz}
+            <span class="text-[10px] text-slate-300 ml-2 font-mono">${b.range || ""}</span>
+          </div>
+          <div class="text-[11px] text-slate-200 mt-1">
+            十神：干 ${b.ssStem || "—"} ／ 支 ${b.ssBranch || "—"}
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-[11px] font-black px-3 py-1 rounded-full bg-black/40">
+            ${tag}
+          </div>
+          <div class="text-[10px] text-slate-400 mt-1">
+            危險指數：
+            <span class="${isRed ? "text-red-300" : "text-emerald-300"} font-mono">
+              ${b.riskScore ?? "—"}
+            </span> / 100
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 點某月 → 在下面 monthDetailBox 顯示個性化原因＋戰術
+    card.addEventListener("click", () => {
+      if (!detail) return;
+      const reasons = (b.reasonTags || []).join("．");
+
+      detail.innerHTML = `
+        <div class="p-4 rounded-xl border ${isRed ? "border-red-400/60 bg-red-500/10" : "border-emerald-400/60 bg-emerald-500/10"} text-sm leading-relaxed space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-[11px] uppercase tracking-[0.18em] text-slate-300">Personalized Month Radar</div>
+              <div class="font-black text-base text-slate-50 mt-1">
+                ${b.gz}（${b.range}）
+              </div>
+            </div>
+            <div class="text-right text-[11px] text-slate-200">
+              危險指數
+              <div class="text-lg font-mono ${isRed ? "text-red-300" : "text-emerald-300"}">
+                ${b.riskScore ?? "—"}/100
+              </div>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-slate-200">
+            個性化觸發：
+            <span class="text-slate-100">${reasons || "（尚未標註觸發原因）"}</span>
+          </div>
+
+          <div class="text-[11px] text-amber-100 mt-1">
+            戰術指令：
+            <span class="text-amber-50">${b.strategy || "（尚未撰寫戰術建議）"}</span>
+          </div>
         </div>
       `;
 
-      if (!bounds.length){
-        mGrid.innerHTML = `<div class="text-xs text-slate-400 italic">（暫無流月資料）</div>`;
-        if (detail){
-          detail.innerHTML = `<div class="text-xs text-slate-400 italic">（暫無流月資料）</div>`;
-        }
-        return;
-      }
+      detail.scrollIntoView({ behavior:"smooth", block:"nearest" });
+    });
 
-      bounds.forEach((b)=>{
-        const isRed = b.light === "RED";
-        const tag   = isRed ? "🔴 壓力" : "🟢 穩進";
+    mGrid.appendChild(card);
 
-        const card = document.createElement("button");
-        card.type = "button";
-        card.className =
-          "w-full text-left flex flex-col gap-1 p-3 rounded-xl border-l-4 transition " +
-          (isRed ? "border-red-500 bg-red-500/10 hover:bg-red-500/20"
-                 : "border-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20");
-
-        card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="font-black text-sm text-slate-50">
-                ${b.gz}
-                <span class="text-[10px] text-slate-300 ml-2 font-mono">${b.range || ""}</span>
-              </div>
-              <div class="text-[11px] text-slate-200 mt-1">
-                十神：干 ${b.ssStem || "—"} ／ 支 ${b.ssBranch || "—"}
-              </div>
-            </div>
-            <div class="text-right">
-              <div class="text-[11px] font-black px-3 py-1 rounded-full bg-black/40">
-                ${tag}
-              </div>
-              <div class="text-[10px] text-slate-400 mt-1">
-                危險指數：
-                <span class="${isRed ? "text-red-300" : "text-emerald-300"} font-mono">
-                  ${b.riskScore ?? "—"}
-                </span> / 100
-              </div>
-            </div>
+    // 右側「2026 流月節奏（快速參考）」：同時顯示 riskScore
+    rhythm.innerHTML += `
+      <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
+        <div class="flex items-center">
+          <span class="month-dot ${isRed ? "bg-red-light" : "bg-green-light"}"></span>
+          <span class="text-[11px] font-black text-slate-200">${b.gz}</span>
+          <span class="text-[9px] text-slate-500 ml-2 font-mono">${b.range || ""}</span>
+        </div>
+        <div class="text-right">
+          <div class="text-[10px] font-black ${isRed ? "text-red-300" : "text-emerald-300"}">
+            ${isRed ? "守規則" : "推進"}
           </div>
-        `;
+          <div class="text-[9px] text-slate-400">危險 ${b.riskScore ?? "—"}</div>
+        </div>
+      </div>
+    `;
+  });
+}
 
-        card.addEventListener("click", () => {
-          if (!detail) return;
-          const reasons = (b.reasonTags || []).join("．");
-
-          detail.innerHTML = `
-            <div class="p-4 rounded-xl border ${isRed ? "border-red-400/60 bg-red-500/10" : "border-emerald-400/60 bg-emerald-500/10"} text-sm leading-relaxed space-y-2">
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="text-[11px] uppercase tracking-[0.18em] text-slate-300">Personalized Month Radar</div>
-                  <div class="font-black text-base text-slate-50 mt-1">
-                    ${b.gz}（${b.range}）
-                  </div>
-                </div>
-                <div class="text-right text-[11px] text-slate-200">
-                  危險指數
-                  <div class="text-lg font-mono ${isRed ? "text-red-300" : "text-emerald-300"}">
-                    ${b.riskScore ?? "—"}/100
-                  </div>
-                </div>
-              </div>
-
-              <div class="text-[11px] text-slate-200">
-                個性化觸發：
-                <span class="text-slate-100">${reasons || "（尚未標註觸發原因）"}</span>
-              </div>
-
-              <div class="text-[11px] text-amber-100 mt-1">
-                戰術指令：
-                <span class="text-amber-50">${b.strategy || "（尚未撰寫戰術建議）"}</span>
-              </div>
-            </div>
-          `;
-
-          detail.scrollIntoView({ behavior:"smooth", block:"nearest" });
-        });
-
-        mGrid.appendChild(card);
-
-        rhythm.innerHTML += `
-          <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
-            <div class="flex items-center">
-              <span class="month-dot ${isRed ? "bg-red-light" : "bg-green-light"}"></span>
-              <span class="text-[11px] font-black text-slate-200">${b.gz}</span>
-              <span class="text-[9px] text-slate-500 ml-2 font-mono">${b.range || ""}</span>
-            </div>
-            <div class="text-right">
-              <div class="text-[10px] font-black ${isRed ? "text-red-300" : "text-emerald-300"}">
-                ${isRed ? "守規則" : "推進"}
-              </div>
-              <div class="text-[9px] text-slate-400">危險 ${b.riskScore ?? "—"}</div>
-            </div>
-          </div>
-        `;
-      });
-    }
 
     // ====== Mobile Bottom Sheet 控制 ======
     function openPalaceSheet(){
@@ -937,86 +927,88 @@
 
     // ====== RENDER: ZIWEI GRID ======
     function renderZiwei(ziwei){
-      const container = document.getElementById("ziweiGrid");
-      const meta = document.getElementById("ziweiMeta");
-      const hint = document.getElementById("ziweiHint");
-      if (!container) return;
+  const container = document.getElementById("ziweiGrid");
+  const meta = document.getElementById("ziweiMeta");
+  const hint = document.getElementById("ziweiHint");
+  if (!container) return;
 
-      container.innerHTML = "";
-      if (!ziwei){
-        container.innerHTML = `
-          <div class="col-span-4 flex items-center justify-center text-xs text-slate-500 text-center">
-            紫微資料暫不可用（後端 iztro 出錯或未回傳）。請稍後重試。
-          </div>`;
-        if (meta) meta.textContent = "";
-        if (hint) hint.textContent = "";
-        return;
-      }
+  container.innerHTML = "";
+  if (!ziwei){
+    container.innerHTML = `
+      <div class="col-span-4 flex items-center justify-center text-xs text-slate-500 text-center">
+        紫微資料暫不可用（後端 iztro 出錯或未回傳）。請稍後重試。
+      </div>`;
+    if (meta) meta.textContent = "";
+    if (hint) hint.textContent = "";
+    return;
+  }
 
-      PALACE_RING.forEach((name, idx)=>{
-        const rawStars = getStarsForPalace(ziwei, name);
-        const stars = rawStars.map(toTraditionalStarName);
-        const isKey = ["命宮","官祿","財帛"].includes(name);
+  // 🔴 這裡用 PALACE_RING，不要再用 PALACE_ORDER
+  PALACE_RING.forEach((name, idx)=>{
+    const rawStars = getStarsForPalace(ziwei, name);
+    const stars = rawStars.map(toTraditionalStarName);
+    const isKey = ["命宮","官祿","財帛"].includes(name);
 
-        let palaceMainElement = "";
-        if (stars.length){
-          palaceMainElement = STAR_WUXING_MAP[stars[0]] || "";
-        }
-        const glowClass = palaceMainElement ? `palace-glow-${palaceMainElement}` : "";
-
-        const starsHtml = stars.length
-          ? stars.map(s=>{
-              const wx = STAR_WUXING_MAP[s] || "";
-              return `<span class="${wx ? "star-wx-"+wx : ""}">${s}</span>`;
-            }).join("<br>")
-          : `<span class="text-slate-600 text-xs italic font-normal">空宮</span>`;
-
-        const el = document.createElement("div");
-        el.className = `zw-palace ${isKey ? "zw-palace-key" : ""} ${glowClass}`;
-        el.style.gridArea = gridAreas[idx];
-        el.innerHTML = `
-          <div class="text-[10px] font-black text-slate-500 mb-1">${name}</div>
-          <div class="text-[13px] font-black leading-snug tracking-wide">${starsHtml}</div>
-        `;
-        el.addEventListener("click", ()=>{
-          selectPalace(name);
-
-          if (window.innerWidth <= 768){
-            openPalaceSheet();
-          } else {
-            document.getElementById("detailPanel").scrollIntoView({ behavior:"smooth", block:"start" });
-          }
-        });
-
-        container.appendChild(el);
-      });
-
-      const center = document.createElement("div");
-      center.className = "zw-center-block";
-      center.innerHTML = `
-        <div class="text-[10px] tracking-[0.18em] text-slate-500 font-black">DESTINY CORE</div>
-        <div class="text-amber-400 font-black text-xl tracking-widest mt-1">${ziwei.core?.minggong || "—"}</div>
-        <div class="text-[11px] text-slate-300 mt-1">身宮：${ziwei.core?.shengong || "—"}</div>
-        <div class="text-[11px] text-slate-400 mt-1">五行局：${ziwei.core?.wuxingju || "—"}</div>
-      `;
-      container.appendChild(center);
-
-      if (meta) meta.textContent = `命宮：${ziwei.core?.minggong || "—"}｜五行局：${ziwei.core?.wuxingju || "—"}`;
-      if (hint) hint.innerHTML = `提示：三方四正＝本宮＋對宮＋三合兩宮（點宮位自動標示）。`;
+    let palaceMainElement = "";
+    if (stars.length){
+      palaceMainElement = STAR_WUXING_MAP[stars[0]] || "";
     }
+    const glowClass = palaceMainElement ? `palace-glow-${palaceMainElement}` : "";
 
-    // ====== Palace Detail ======
-    function selectPalace(name){
-      selectedPalace = name;
+    const starsHtml = stars.length
+      ? stars.map(s=>{
+          const wx = STAR_WUXING_MAP[s] || "";
+          return `<span class="${wx ? "star-wx-"+wx : ""}">${s}</span>`;
+        }).join("<br>")
+      : `<span class="text-slate-600 text-xs italic font-normal">空宮</span>`;
 
-      const idx = PALACE_RING.indexOf(name);
-      const related = new Set([idx, (idx+6)%12, (idx+4)%12, (idx+8)%12]);
+    const el = document.createElement("div");
+    el.className = `zw-palace ${isKey ? "zw-palace-key" : ""} ${glowClass}`;
+    el.style.gridArea = gridAreas[idx];
+    el.innerHTML = `
+      <div class="text-[10px] font-black text-slate-500 mb-1">${name}</div>
+      <div class="text-[13px] font-black leading-snug tracking-wide">${starsHtml}</div>
+    `;
+    el.addEventListener("click", ()=>{
+      selectPalace(name);
 
-      document.querySelectorAll(".zw-palace").forEach((el, i)=>{
-        el.classList.remove("is-active","is-related");
-        if (i === idx) el.classList.add("is-active");
-        else if (related.has(i)) el.classList.add("is-related");
-      });
+      if (window.innerWidth <= 768){
+        openPalaceSheet();
+      } else {
+        document.getElementById("detailPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+      }
+    });
+
+    container.appendChild(el);
+  });
+
+  const center = document.createElement("div");
+  center.className = "zw-center-block";
+  center.innerHTML = `
+    <div class="text-[10px] tracking-[0.18em] text-slate-500 font-black">DESTINY CORE</div>
+    <div class="text-amber-400 font-black text-xl tracking-widest mt-1">${ziwei.core?.minggong || "—"}</div>
+    <div class="text-[11px] text-slate-300 mt-1">身宮：${ziwei.core?.shengong || "—"}</div>
+    <div class="text-[11px] text-slate-400 mt-1">五行局：${ziwei.core?.wuxingju || "—"}</div>
+  `;
+  container.appendChild(center);
+
+  if (meta) meta.textContent = `命宮：${ziwei.core?.minggong || "—"}｜五行局：${ziwei.core?.wuxingju || "—"}`;
+  if (hint) hint.innerHTML = `提示：三方四正＝本宮＋對宮＋三合兩宮（點宮位自動標示）。`;
+}
+    // ====== Palace Detail (DB-driven) ======
+   function selectPalace(name){
+  selectedPalace = name;
+
+  // 三方四正：本宮 + 對宮( +6 ) + 三合( +4, +8 )
+  const idx = PALACE_RING.indexOf(name);   // 🔴 這裡改成 PALACE_RING
+  const related = new Set([idx, (idx+6)%12, (idx+4)%12, (idx+8)%12]);
+
+  document.querySelectorAll(".zw-palace").forEach((el, i)=>{
+    el.classList.remove("is-active","is-related");
+    if (i === idx) el.classList.add("is-active");
+    else if (related.has(i)) el.classList.add("is-related");
+  });
+
 
       const ziwei = contract?.ziwei;
       const rawStars = ziwei ? getStarsForPalace(ziwei, name) : [];
@@ -1025,10 +1017,9 @@
       const titleText = `2026 ${name} · 作戰面板`;
       const subText   = `三方四正已標示：本宮＋對宮＋三合（共四宮）。`;
 
-      const palaceTitle = document.getElementById("palaceTitle");
-      const palaceSub   = document.getElementById("palaceSub");
-      if (palaceTitle) palaceTitle.textContent = titleText;
-      if (palaceSub)   palaceSub.textContent   = subText;
+      // desktop header
+      document.getElementById("palaceTitle").textContent = titleText;
+      document.getElementById("palaceSub").textContent   = subText;
 
       const palaceText = (dbContent.palaces && dbContent.palaces[name]) ? dbContent.palaces[name] : "（資料庫尚未填入此宮位解釋）";
 
@@ -1046,6 +1037,9 @@
               <div class="text-xs text-slate-300 mt-2 leading-relaxed">${explain}</div>
             </div>
           `;
+
+
+
         }).join("");
       } else {
         starCards = `
@@ -1068,9 +1062,11 @@
         </div>
       `;
 
+      // desktop body
       const body = document.getElementById("palaceDetailBody");
-      if (body) body.innerHTML = detailHtml;
+      body.innerHTML = detailHtml;
 
+      // mobile bottom sheet 同步
       const mTitle = document.getElementById("mobilePalaceTitle");
       const mSub   = document.getElementById("mobilePalaceSub");
       const mBody  = document.getElementById("mobilePalaceBody");
@@ -1107,26 +1103,32 @@
       const vmin = Number(document.getElementById("birthMinute").value);
 
       try{
-        if (![vy,vm,vd,vh,vmin].every(n=>Number.isFinite(n))) {
-          throw new Error("請先選完整出生資料");
-        }
+        if (![vy,vm,vd,vh,vmin].every(n=>Number.isFinite(n))) throw new Error("請先選完整出生資料");
 
         btn.disabled = true;
         btn.textContent = "計算中…";
         hint.textContent = "正在連線後端計算（八字＋紫微＋流月＋十神）…";
+const resp = await fetch(`${API_BASE}/compute/all`, {
+  method:"POST",
+  headers: {"Content-Type":"application/json"},
+  body: JSON.stringify({ year:vy, month:vm, day:vd, hour:vh, minute:vmin })
+});
 
-        const resp = await fetch(`${API_BASE}/compute/all`, {
-          method:"POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ year:vy, month:vm, day:vd, hour:vh, minute:vmin })
-        });
+if (!resp.ok){
+  const t = await resp.text().catch(()=> "");
+  throw new Error(`API HTTP ${resp.status} ${t}`.trim());
+}
 
-        if (!resp.ok){
-          const t = await resp.text().catch(()=> "");
-          throw new Error(`API HTTP ${resp.status} ${t}`.trim());
-        }
+// ✅ 這裡一定要是 payload，不是 data
+const payload = await resp.json();
 
-        const payload = await resp.json();
+// ⭐ 第一步：確認後端到底回了什麼
+console.log("compute/all returns payload:", payload);
+console.log("chartId from payload:", payload.chartId);
+
+
+
+
         if (!payload?.ok) throw new Error(payload?.error || "API error");
 
         contract = payload.features;
@@ -1134,145 +1136,78 @@
           throw new Error("features 格式錯誤（不是 strategic_features_v1）");
         }
 
-        const chartId = payload.chartId || contract.chartId || null;
         const bazi = contract.bazi;
         const ziwei = contract.ziwei;
+// 動態宮位環：從後端拿 iztro 的 palaces 排序
+if (ziwei && Array.isArray(ziwei.palaceRing)) {
+  PALACE_RING = ziwei.palaceRing.map((name) => {
+    // 把「命宫」這類簡體宮名轉成你前端統一用的繁體
+    // 這裡簡單粗暴處理一下
+    if (name === "命宫") return "命宮";
+    if (name === "财帛") return "財帛";
+    if (name === "官禄") return "官祿";
+    // 其他保持原樣（兄弟、夫妻、子女…本來就一樣）
+    return name;
+  });
+} else {
+  PALACE_RING = PALACE_DEFAULT.slice();
+}
+
+
 
         if (!bazi) throw new Error("後端未回傳 bazi");
 
-        let ziweiScores = null;
-
-        if (chartId) {
-          try {
-            const scoreResp = await fetch(
-              `${API_BASE}/charts/${encodeURIComponent(chartId)}/scores`,
-              { method: "GET" }
-            );
-            if (scoreResp.ok) {
-              ziweiScores = await scoreResp.json();
-              window.ziweiScores = ziweiScores;
-              console.log("ziweiScores from API:", ziweiScores);
-            } else {
-              console.warn("scores API HTTP", scoreResp.status, await scoreResp.text().catch(()=> ""));
-            }
-          } catch (err) {
-            console.warn("scores API error:", err);
-          }
-        } else {
-          console.warn("No chartId in payload, scores API 無法呼叫");
-        }
-
-        // 動態宮位環：從後端拿 iztro 的 palaces 排序
-        if (ziwei && Array.isArray(ziwei.palaceRing)) {
-          PALACE_RING = ziwei.palaceRing.map((name) => {
-            if (name === "命宫") return "命宮";
-            if (name === "财帛") return "財帛";
-            if (name === "官禄") return "官祿";
-            return name;
-          });
-        } else {
-          PALACE_RING = PALACE_DEFAULT.slice();
-        }
-
-        // ===== 進入系統 UI =====
-        const sysEl   = document.getElementById("system");
-        const navEl   = document.getElementById("workspaceNav");
-        const navCta  = document.getElementById("navCta");
-        const inputEl = document.getElementById("inputCard");
-
-        if (sysEl)   sysEl.classList.remove("hidden");
-        if (navEl)   navEl.classList.remove("hidden");
-        if (navCta)  navCta.classList.remove("hidden");
-        if (inputEl) inputEl.classList.add("hidden");
+        // 進入系統：顯示 workspace nav + CTA，並收起輸入卡
+        document.getElementById("system").classList.remove("hidden");
+        document.getElementById("workspaceNav").classList.remove("hidden");
+        document.getElementById("navCta").classList.remove("hidden");
+        document.getElementById("inputCard").classList.add("hidden");
 
         // summary
-        const summaryBirthEl     = document.getElementById("summaryBirth");
-        const summaryDMEl        = document.getElementById("summaryDM");
-        const summaryDominantEl  = document.getElementById("summaryDominant");
-        const summaryRedMonthsEl = document.getElementById("summaryRedMonths");
-
-        if (summaryBirthEl) {
-          summaryBirthEl.textContent =
-            `${vy}/${pad2(vm)}/${pad2(vd)} · ${pad2(vh)}:${pad2(vmin)}（公曆）`;
-        }
-        if (summaryDMEl) {
-          summaryDMEl.textContent = bazi.dmElement || "—";
-        }
-        if (summaryDominantEl) {
-          summaryDominantEl.textContent =
-            (bazi.tenGod?.dominant || "—").trim() || "—";
-        }
-        if (summaryRedMonthsEl) {
-          const reds = bazi.liuyue2026?.redMonths || [];
-          summaryRedMonthsEl.textContent =
-            reds.length ? reds.join("、") : "偏少（可穩推）";
-        }
+        document.getElementById("summaryBirth").textContent =
+          `${vy}/${pad2(vm)}/${pad2(vd)} · ${pad2(vh)}:${pad2(vmin)}（公曆）`;
+        document.getElementById("summaryDM").textContent = bazi.dmElement || "—";
+        document.getElementById("summaryDominant").textContent = (bazi.tenGod?.dominant || "—").trim() || "—";
+        const reds = bazi.liuyue2026?.redMonths || [];
+        document.getElementById("summaryRedMonths").textContent = reds.length ? reds.join("、") : "偏少（可穩推）";
 
         // bazi + canggan + bars
         renderPillars(bazi);
         renderBar("surfaceWx", bazi.wuxing?.surface, 4);
         renderBar("strategicWx", bazi.wuxing?.strategic, bazi.wuxing?.maxStrategic || 1);
 
-        // tenGod command box
+        // tenGod command box (DB first)
         const dominant = (bazi.tenGod?.dominant || "").trim();
         const cmd = dominant && dbContent.tenGods?.[dominant] ? dbContent.tenGods[dominant] : "";
-        const tenGodCommand = document.getElementById("tenGodCommand");
-        if (tenGodCommand) {
-          tenGodCommand.textContent =
-            cmd || `（資料庫尚未填入「${dominant || "—"}」的十神指令。你可以先在 ten_god_analysis 補上 2026 內容。）`;
-        }
+        document.getElementById("tenGodCommand").textContent =
+          cmd || `（資料庫尚未填入「${dominant || "—"}」的十神指令。你可以先在 ten_god_analysis 補上 2026 內容。）`;
 
         // liuyue
         renderLiuyue(bazi);
 
         // ziwei grid
         renderZiwei(ziwei);
-
-        const metaEl = document.getElementById("ziweiMeta");
-        if (metaEl) {
-          metaEl.textContent =
-            ziwei ? `命宮：${ziwei.core?.minggong || "—"}｜五行局：${ziwei.core?.wuxingju || "—"}` : "—";
-        }
-
-        // 紫微分數
-        if (ziweiScores && ziweiScores.palaceScores) {
-          renderZiweiScores(ziweiScores);
-        } else {
-          const palaceBox = document.getElementById("ziweiPalaceScores");
-          if (palaceBox) {
-            palaceBox.innerHTML =
-              `<div class="text-xs text-slate-400">（暫無分數資料）</div>`;
-          }
-          renderBar("ziweiWx", { 木:0, 火:0, 土:0, 金:0, 水:0 }, 1);
-        }
+        document.getElementById("ziweiMeta").textContent =
+          ziwei ? `命宮：${ziwei.core?.minggong || "—"}｜五行局：${ziwei.core?.wuxingju || "—"}` : "—";
 
         // tactical panel
         const tactics = computeDynamicTactics(bazi);
         const tacticalBox = document.getElementById("tacticalBox");
-        if (tacticalBox) {
-          tacticalBox.innerHTML = tactics.length
-            ? tactics.map(x => `<div class="p-4 rounded-xl border ${toneClass(x.tone)} text-sm leading-relaxed">${x.text}</div>`).join("")
-            : `<div class="text-sm text-slate-400 italic">（戰術提示暫不可用）</div>`;
-        }
+        tacticalBox.innerHTML = tactics.length
+          ? tactics.map(x => `<div class="p-4 rounded-xl border ${toneClass(x.tone)} text-sm leading-relaxed">${x.text}</div>`).join("")
+          : `<div class="text-sm text-slate-400 italic">（戰術提示暫不可用）</div>`;
 
         // default select 命宮
         if (ziwei){
           selectPalace("命宮");
         } else {
-          const palaceTitle = document.getElementById("palaceTitle");
-          const palaceDetailBody = document.getElementById("palaceDetailBody");
-          if (palaceTitle) palaceTitle.textContent = "紫微暫不可用";
-          if (palaceDetailBody) {
-            palaceDetailBody.innerHTML = `<div class="p-4 rounded-xl border border-white/10 bg-white/5 text-sm text-slate-300">
-              後端 iztro 可能出錯（或打包問題）。請先確認 worker build/依賴，再重試。
-            </div>`;
-          }
+          document.getElementById("palaceTitle").textContent = "紫微暫不可用";
+          document.getElementById("palaceDetailBody").innerHTML = `<div class="p-4 rounded-xl border border-white/10 bg-white/5 text-sm text-slate-300">
+            後端 iztro 可能出錯（或打包問題）。請先確認 worker build/依賴，再重試。
+          </div>`;
         }
 
-        const wsSummary = document.getElementById("ws-summary");
-        if (wsSummary) {
-          wsSummary.scrollIntoView({ behavior:"smooth", block:"start" });
-        }
+        document.getElementById("ws-summary").scrollIntoView({ behavior:"smooth", block:"start" });
 
       }catch(e){
         console.error(e);
@@ -1282,27 +1217,6 @@
         btn.textContent = original;
         hint.textContent = "";
       }
-    }
-
-    function renderZiweiScores(scores){
-      const palaceBox = document.getElementById("ziweiPalaceScores");
-      const wuxingBox = document.getElementById("ziweiWuxingScores");
-
-      if (!palaceBox || !wuxingBox) return;
-
-      const sortedPalaces = Object.entries(scores.palaceScores || {})
-        .sort((a, b) => b[1] - a[1]);
-
-      palaceBox.innerHTML = sortedPalaces.length
-        ? sortedPalaces.map(([name, val]) => `
-            <div class="flex justify-between text-xs py-1 border-b border-white/5">
-              <span class="text-slate-300">${name}</span>
-              <span class="text-slate-100 font-mono">${Number(val).toFixed(2)}</span>
-            </div>
-          `).join("")
-        : `<div class="text-xs text-slate-400">（尚未計算宮位權重）</div>`;
-
-      renderBar("ziweiWx", scores.elementRatios || {}, 1);
     }
 
     // ====== INIT SELECTORS ======
@@ -1349,6 +1263,7 @@
       document.getElementById("btnLaunch").addEventListener("click", calculate);
       await loadDbContent();
 
+      // Mobile Bottom Sheet 關閉事件
       const closeBtn = document.getElementById("palaceSheetClose");
       const backdrop = document.getElementById("palaceSheetBackdrop");
       if (closeBtn) closeBtn.addEventListener("click", closePalaceSheet);
@@ -1381,3 +1296,5 @@
   </div>
 </body>
 </html>
+
+
