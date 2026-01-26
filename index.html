@@ -1291,25 +1291,51 @@ function renderZiweiScores(scores){
   const palaceBox = document.getElementById("ziweiPalaceScores");
   const wuxingBox = document.getElementById("ziweiWuxingScores");
 
-  if (!palaceBox || !wuxingBox) return;
+  if (!palaceBox || !wuxingBox) {
+    console.warn("ziwei score boxes not found in DOM");
+    return;
+  }
+
+  console.log("[renderZiweiScores] raw scores =", scores);
 
   // 1️⃣ 宮位強度：依分數排序
-  const sortedPalaces = Object.entries(scores.palaceScores || {})
-    .sort((a, b) => b[1] - a[1]); // 依分數由大到小
+  const entries = Object.entries(scores?.palaceScores || {});
+  console.log("[renderZiweiScores] palace entries =", entries);
 
-  palaceBox.innerHTML = sortedPalaces.length
-    ? sortedPalaces.map(([name, val]) => `
+  const sortedPalaces = entries.sort((a, b) => Number(b[1]) - Number(a[1]));
+
+  if (!sortedPalaces.length) {
+    palaceBox.innerHTML =
+      `<div class="text-xs text-slate-400">（尚未計算宮位權重）</div>`;
+  } else {
+    palaceBox.innerHTML = sortedPalaces.map(([name, val]) => {
+      const n = Number(val) || 0;
+      return `
         <div class="flex justify-between text-xs py-1 border-b border-white/5">
           <span class="text-slate-300">${name}</span>
-          <span class="text-slate-100 font-mono">${val.toFixed(2)}</span>
+          <span class="text-slate-100 font-mono">${n.toFixed(2)}</span>
         </div>
-      `).join("")
-    : `<div class="text-xs text-slate-400">（尚未計算宮位權重）</div>`;
+      `;
+    }).join("");
+  }
 
-  // 2️⃣ 五行比例：用你原本的 renderBar 當視覺
-  // scores.elementRatios 是 0~1，max 就給 1 就好
-  renderBar("ziweiWx", scores.elementRatios || {}, 1);
+  // 2️⃣ 五行比例：轉成 0~100%，再丟給 renderBar
+  const ratios = scores?.elementRatios || {};
+  console.log("[renderZiweiScores] elementRatios =", ratios);
+
+  const wxForBar = {
+    木: (Number(ratios["木"]) || 0) * 100,
+    火: (Number(ratios["火"]) || 0) * 100,
+    土: (Number(ratios["土"]) || 0) * 100,
+    金: (Number(ratios["金"]) || 0) * 100,
+    水: (Number(ratios["水"]) || 0) * 100,
+  };
+
+  // max 給 100，這樣 bar 長度是 %，數字顯示 0.xx
+  renderBar("ziweiWx", wxForBar, 100);
 }
+
+
 
 
 
