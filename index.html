@@ -1133,6 +1133,9 @@ async function calculate(){
     }
 
     const payload = await resp.json();
+console.log("compute/all payload:", payload);
+console.log("chartId from payload:", payload.chartId);
+
     if (!payload?.ok) throw new Error(payload?.error || "API error");
 
     contract = payload.features;
