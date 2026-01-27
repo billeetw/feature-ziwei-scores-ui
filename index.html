@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>紫微聖人0.1｜一起出來玩</title>
   <title>紫微聖人0.2｜一起出來玩</title>
 
   <!-- Tailwind CDN（開發用） -->
@@ -40,7 +39,6 @@
     <header id="landing" class="text-center space-y-3">
       <p class="section-subtitle">2026 Strategic Command Hub</p>
       <h1 class="text-3xl md:text-5xl font-black tracking-tight">
-        紫微聖人0.1
         紫微聖人0.2
       </h1>
       <p class="text-sm text-slate-400 max-w-3xl mx-auto">
@@ -1421,18 +1419,3 @@ function renderBar(targetId, data, max) {
   }
 
   </script>
-  // ====== BOOT ======
-  document.addEventListener("DOMContentLoaded", async ()=>{
-    initSelectors();
-    document.getElementById("btnLaunch").addEventListener("click", calculate);
-    await loadDbContent();
-
-  <!-- 手機版宮位詳解 Bottom Sheet -->
-  <div id="palaceSheetBackdrop" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden"></div>
-    // Mobile Bottom Sheet 關閉事件
-    const closeBtn = document.getElementById("palaceSheetClose");
-    const backdrop = document.getElementById("palaceSheetBackdrop");
-    if (closeBtn) closeBtn.addEventListener("click", closePalaceSheet);
-    if (backdrop) backdrop.addEventListener("click", closePalaceSheet);
-  });
-</script>
