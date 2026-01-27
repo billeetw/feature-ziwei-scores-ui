@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>紫微聖人0.1｜一起出來玩</title>
+  <title>紫微聖人0.2｜一起出來玩</title>
 
   <!-- Tailwind CDN（開發用） -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -214,6 +214,32 @@
         display: none !important;
       }
     }
+/* --- 2.0 新增能量與動畫樣式 --- */
+.palace-energy {
+  position: relative;
+  transition: all 0.5s ease;
+}
+.palace-energy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at center, rgba(251, 191, 36, var(--intensity)), transparent 80%);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
+}
+.energy-high {
+  animation: pulse-energy 3s infinite ease-in-out;
+  border-color: rgba(251, 191, 36, 0.6) !important;
+}
+@keyframes pulse-energy {
+  0%, 100% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.2); }
+  50% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.5); }
+}
+/* 雷達圖文字樣式 */
+#radarLabels text { font-size: 5px; fill: #94a3b8; font-weight: 800; }
+
   </style>
 </head>
 
@@ -223,7 +249,7 @@
   <div class="nav-bar flex items-center justify-between gap-3">
     <div class="flex items-center gap-2">
       <div class="font-black tracking-[0.22em] text-[10px] uppercase">一起出來玩</div>
-      <div class="text-[10px] opacity-85">紫微聖人0.1</div>
+      <div class="text-[10px] opacity-85">紫微聖人0.2</div>
     </div>
 
     <!-- workspace nav (only after system entered) -->
@@ -247,7 +273,7 @@
     <header id="landing" class="text-center space-y-3">
       <p class="section-subtitle">2026 Strategic Command Hub</p>
       <h1 class="text-3xl md:text-5xl font-black tracking-tight">
-        紫微聖人0.1
+        紫微聖人0.2
       </h1>
       <p class="text-sm text-slate-400 max-w-3xl mx-auto">
         後端同步計算：八字五行（含藏干加權）＋十神主軸＋2026 流月紅綠燈＋紫微 12 宮主/副星。<br/>
@@ -392,6 +418,14 @@
               <h2 class="text-xl font-black tracking-tight">2026 流月紅綠燈（12）</h2>
               <p class="text-xs text-slate-400 mt-1">🔴 壓力月：先守規則／🟢 穩進月：適合推進專案</p>
             </div>
+<div class="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10">
+  <div class="section-subtitle mb-4">2026 Annual Strategy Timeline</div>
+  <div class="relative px-2">
+    <div class="absolute top-1/2 left-0 w-full h-[1px] bg-white/10 -translate-y-1/2"></div>
+    <div id="annualTimeline" class="relative flex justify-between items-center"></div>
+  </div>
+</div>
+
              <div id="monthGrid" class="space-y-2"></div>
              <div id="monthDetailBox" class="mt-4 space-y-2 text-xs"></div>
           </section>
@@ -1174,7 +1208,19 @@ console.log("chartId from payload:", payload.chartId);
       }
     } else {
       console.warn("No chartId in payload, scores API 無法呼叫");
-    }
+    }// ... 在成功獲取 contract 資料後 ...
+
+// 1. 執行流月渲染 (這會同時畫出時間軸)
+renderLiuyue(bazi); 
+
+// 2. 執行雷達圖
+renderRadarChart(bazi.wuxing.strategic);
+
+// 3. 執行能量地圖 (如果有拿到 ziweiScores)
+if (ziweiScores) {
+    applyPalaceHeatmap(ziweiScores);
+}
+
 
     // 動態宮位環：從後端拿 iztro 的 palaces 排序
     if (ziwei && Array.isArray(ziwei.palaceRing)) {
@@ -1416,4 +1462,5 @@ function renderZiweiScores(scores){
   </div>
 </body>
 </html>
+
 
