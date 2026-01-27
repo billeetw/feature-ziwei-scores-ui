@@ -214,32 +214,6 @@
         display: none !important;
       }
     }
-/* --- 2.0 新增能量與動畫樣式 --- */
-.palace-energy {
-  position: relative;
-  transition: all 0.5s ease;
-}
-.palace-energy::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(circle at center, rgba(251, 191, 36, var(--intensity)), transparent 80%);
-  opacity: 0.6;
-  pointer-events: none;
-  z-index: 0;
-}
-.energy-high {
-  animation: pulse-energy 3s infinite ease-in-out;
-  border-color: rgba(251, 191, 36, 0.6) !important;
-}
-@keyframes pulse-energy {
-  0%, 100% { box-shadow: 0 0 10px rgba(251, 191, 36, 0.2); }
-  50% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.5); }
-}
-/* 雷達圖文字樣式 */
-#radarLabels text { font-size: 5px; fill: #94a3b8; font-weight: 800; }
-
   </style>
 </head>
 
@@ -418,14 +392,6 @@
               <h2 class="text-xl font-black tracking-tight">2026 流月紅綠燈（12）</h2>
               <p class="text-xs text-slate-400 mt-1">🔴 壓力月：先守規則／🟢 穩進月：適合推進專案</p>
             </div>
-<div class="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10">
-  <div class="section-subtitle mb-4">2026 Annual Strategy Timeline</div>
-  <div class="relative px-2">
-    <div class="absolute top-1/2 left-0 w-full h-[1px] bg-white/10 -translate-y-1/2"></div>
-    <div id="annualTimeline" class="relative flex justify-between items-center"></div>
-  </div>
-</div>
-
              <div id="monthGrid" class="space-y-2"></div>
              <div id="monthDetailBox" class="mt-4 space-y-2 text-xs"></div>
           </section>
@@ -1134,8 +1100,9 @@ function renderLiuyue(bazi){
       }
     }
 
-async function calculate() {
-  const btn = document.getElementById("btnLaunch");
+// ====== Calculate ======
+async function calculate(){
+  const btn  = document.getElementById("btnLaunch");
   const hint = document.getElementById("hint");
   const original = btn.textContent;
 
@@ -1145,8 +1112,8 @@ async function calculate() {
   const vh = Number(document.getElementById("birthHour").value);
   const vmin = Number(document.getElementById("birthMinute").value);
 
-  try {
-    if (![vy, vm, vd, vh, vmin].every(n => Number.isFinite(n))) {
+  try{
+    if (![vy,vm,vd,vh,vmin].every(n=>Number.isFinite(n))) {
       throw new Error("請先選完整出生資料");
     }
 
@@ -1155,75 +1122,59 @@ async function calculate() {
     hint.textContent = "正在連線後端計算（八字＋紫微＋流月＋十神）…";
 
     const resp = await fetch(`${API_BASE}/compute/all`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ year: vy, month: vm, day: vd, hour: vh, minute: vmin })
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ year:vy, month:vm, day:vd, hour:vh, minute:vmin })
     });
 
-    if (!resp.ok) {
-      const t = await resp.text().catch(() => "");
+    if (!resp.ok){
+      const t = await resp.text().catch(()=> "");
       throw new Error(`API HTTP ${resp.status} ${t}`.trim());
     }
 
     const payload = await resp.json();
+console.log("compute/all payload:", payload);
+console.log("chartId from payload:", payload.chartId);
+
     if (!payload?.ok) throw new Error(payload?.error || "API error");
 
     contract = payload.features;
+    if (!contract || contract.version !== "strategic_features_v1"){
+      throw new Error("features 格式錯誤（不是 strategic_features_v1）");
+    }
+
+    // ✅ chartId 先抓出來
     const chartId = payload.chartId || contract.chartId || null;
     const bazi = contract.bazi;
     const ziwei = contract.ziwei;
 
     if (!bazi) throw new Error("後端未回傳 bazi");
 
-    // --- A. 獲取額外分數資料 ---
+    // ✅ 先預設 ziweiScores = null
     let ziweiScores = null;
+
+    // ✅ 有 chartId 才打 scores API
     if (chartId) {
       try {
-        const scoreResp = await fetch(`${API_BASE}/charts/${encodeURIComponent(chartId)}/scores`, { method: "GET" });
+        const scoreResp = await fetch(
+          `${API_BASE}/charts/${encodeURIComponent(chartId)}/scores`,
+          { method: "GET" }
+        );
         if (scoreResp.ok) {
           ziweiScores = await scoreResp.json();
+          window.ziweiScores = ziweiScores; // 給你 debug 用
+          console.log("ziweiScores from API:", ziweiScores);
+          console.log("payload:", payload);
+          console.log("chartId:", chartId);
+ } else {
+          console.warn("scores API HTTP", scoreResp.status, await scoreResp.text().catch(()=> ""));
         }
-      } catch (err) { console.warn("scores API error:", err); }
+      } catch (err) {
+        console.warn("scores API error:", err);
+      }
+    } else {
+      console.warn("No chartId in payload, scores API 無法呼叫");
     }
-
-    // --- B. 執行視覺化渲染 (這三行是你剛加的) ---
-    renderLiuyue(bazi);                    // 畫流月列表 + 時間軸
-    renderRadarChart(bazi.wuxing.strategic); // 畫五行雷達圖
-    if (ziweiScores) {
-      applyPalaceHeatmap(ziweiScores);     // 畫紫微能量地圖
-      renderZiweiScores(ziweiScores);      // 顯示分數列表
-    }
-
-    // --- C. UI 狀態切換 (這部分不能漏掉，否則你看不到結果) ---
-    const sysEl = document.getElementById("system");
-    const inputEl = document.getElementById("inputCard");
-    const navEl = document.getElementById("workspaceNav");
-
-    if (sysEl) sysEl.classList.remove("hidden");
-    if (inputEl) inputEl.classList.add("hidden");
-    if (navEl) navEl.classList.remove("hidden");
-
-    // --- D. 基礎資料填充 (Summary, Pillars, Grid) ---
-    renderPillars(bazi); // 畫八字四柱
-    renderBar("surfaceWx", bazi.wuxing?.surface, 4);
-    renderBar("strategicWx", bazi.wuxing?.strategic, bazi.wuxing?.maxStrategic || 1);
-    renderZiwei(ziwei);  // 畫紫微方盤
-    
-    // 預設選擇命宮
-    if (ziwei) selectPalace("命宮");
-
-    document.getElementById("ws-summary").scrollIntoView({ behavior: "smooth" });
-
-  } catch (e) {
-    console.error(e);
-    alert("系統忙碌中：\n" + (e?.message || e));
-  } finally {
-    btn.disabled = false;
-    btn.textContent = original;
-    hint.textContent = "";
-  }
-}
-
 
     // 動態宮位環：從後端拿 iztro 的 palaces 排序
     if (ziwei && Array.isArray(ziwei.palaceRing)) {
