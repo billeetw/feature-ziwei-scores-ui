@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>紫微聖人0.1｜一起出來玩</title>
+  <title>紫微聖人0.21｜一起出來玩</title>
 
   <!-- Tailwind CDN（開發用） -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -236,7 +236,7 @@
   <div class="nav-bar flex items-center justify-between gap-3">
     <div class="flex items-center gap-2">
       <div class="font-black tracking-[0.22em] text-[10px] uppercase">一起出來玩</div>
-      <div class="text-[10px] opacity-85">紫微聖人0.1</div>
+      <div class="text-[10px] opacity-85">紫微聖人0.21</div>
     </div>
 
     <!-- workspace nav (only after system entered) -->
@@ -260,7 +260,7 @@
     <header id="landing" class="text-center space-y-3">
       <p class="section-subtitle">2026 Strategic Command Hub</p>
       <h1 class="text-3xl md:text-5xl font-black tracking-tight">
-        紫微聖人0.1
+        紫微聖人0.21
       </h1>
       <p class="text-sm text-slate-400 max-w-3xl mx-auto">
         後端同步計算：八字五行（含藏干加權）＋十神主軸＋2026 流月紅綠燈＋紫微 12 宮主/副星。<br/>
@@ -484,6 +484,55 @@
       </div>
     </section>
   </main>
+  <!-- 手機版：宮位詳解 Bottom Sheet Backdrop -->
+  <div
+    id="palaceSheetBackdrop"
+    class="fixed inset-0 bg-black/60 z-40 hidden md:hidden"
+  ></div>
+
+  <!-- 手機版：宮位詳解 Bottom Sheet -->
+  <div
+    id="palaceSheet"
+    class="palace-sheet md:hidden"
+    aria-hidden="true"
+  >
+    <div class="palace-sheet-handle"></div>
+
+    <div class="palace-sheet-header mb-3">
+      <div>
+        <div
+          id="mobilePalaceTitle"
+          class="text-base font-black text-amber-300"
+        >
+          請點宮位
+        </div>
+        <div
+          id="mobilePalaceSub"
+          class="text-[11px] text-slate-400 mt-1 leading-relaxed"
+        >
+          點擊紫微方盤上的任一宮位，這裡會顯示三方四正與星曜解釋。
+        </div>
+      </div>
+
+      <button
+        id="palaceSheetClose"
+        type="button"
+        class="palace-sheet-close text-[11px]"
+      >
+        關閉
+      </button>
+    </div>
+
+    <div
+      id="mobilePalaceBody"
+      class="mt-2 space-y-4 text-sm text-slate-100"
+    >
+      <div class="text-center py-8 text-slate-500 italic text-xs">
+        點擊紫微方盤的任一宮位，這裡會顯示詳解。
+      </div>
+    </div>
+  </div>
+
 
 <script>
   // ====== CONFIG ======
@@ -980,7 +1029,7 @@
 
     return BRANCH_RING.map((branch, idx) => {
       // 讓「命宮」對齊命宮地支所在的那一格，其餘宮位照逆行順序排
-      const palaceIndex = (idx - mingIdx + 12) % 12;
+      const palaceIndex = (mingIdx - idx + 12) % 12;
       const palaceName  = palaceOrder[palaceIndex];
 
       const rawStars = getStarsForPalace(ziwei, palaceName);
@@ -1061,7 +1110,7 @@
       el.addEventListener("click", ()=>{
         selectPalace(slot.palaceName);
 
-        if (window.innerWidth <= 768){
+        if (window.innerWidth < 768){
           openPalaceSheet();
         } else {
           document.getElementById("detailPanel").scrollIntoView({ behavior:"smooth", block:"start" });
@@ -1457,5 +1506,7 @@
     if (backdrop) backdrop.addEventListener("click", closePalaceSheet);
   });
 </script>
+
+
 
 
